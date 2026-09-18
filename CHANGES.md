@@ -9,6 +9,14 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 - (placeholder — next iteration's changes land here)
 
+## [0.1.2] — 2026-09-17
+
+### Changed
+- `README.md` rewritten to drop openOODA substrate references
+  (Necrometer / seance + opm mentions removed). The "same family as
+  Vigil" framing now points at the pure-Rust + std:: style instead of
+  a shared substrate.
+
 ## [0.1.1] — 2026-09-17
 
 ### Added
