@@ -1,144 +1,19 @@
 //! main.rs — Boneyard CLI entry point.
-//! Standard CLI flags: -h/--help, -V/--version, --format, -o/--output, -q/--quiet, -v/--verbose.
+//! Standard CLI flags: -h/--help, -V/--version, -f/--format, -o/--output, -q/--quiet, -v/--verbose.
 
+mod budget;
+mod cli;
+mod doctor;
+mod update;
+mod xdg;
+
+use boneyard::{enrich, load_hall_file, parse_hall_json, parse_policy_toml, report, Policy};
+use cli::{parse_args, print_help, CliConfig, CliError, OutputFormat, Subcommand, VERSION};
 use std::env;
 use std::fs;
 use std::io::{self, Read};
 use std::path::PathBuf;
 use std::process;
-use boneyard::{enrich, load_hall_file, parse_hall_json, parse_policy_toml, report, Policy};
-
-const VERSION: &str = "0.2.0";
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum OutputFormat {
-    Text,
-    Json,
-    Markdown,
-}
-
-#[derive(Debug)]
-struct CliConfig {
-    subcommand: String,
-    input_file: Option<PathBuf>,
-    policy_file: Option<PathBuf>,
-    format: OutputFormat,
-    output_file: Option<PathBuf>,
-    quiet: bool,
-    verbose: bool,
-}
-
-impl Default for CliConfig {
-    fn default() -> Self {
-        CliConfig {
-            subcommand: "enrich".to_string(),
-            input_file: None,
-            policy_file: None,
-            format: OutputFormat::Text,
-            output_file: None,
-            quiet: false,
-            verbose: false,
-        }
-    }
-}
-
-fn print_help() {
-    println!(
-        "boneyard {} — Org-wide tech-debt radar\n\
-        \n\
-        USAGE:\n\
-          boneyard [SUBCOMMAND] [OPTIONS] [FILE]\n\
-        \n\
-        SUBCOMMANDS:\n\
-          enrich         Score repository tech-debt and dormancy (default)\n\
-          report         Generate executive Markdown/JSON remediation report\n\
-          policy check   Assert compliance against organization policy\n\
-        \n\
-        OPTIONS:\n\
-          -h, --help              Print help information\n\
-          -V, --version           Print version information\n\
-          --format <fmt>          Output format: text, json, markdown [default: text]\n\
-          -o, --output <file>     Write report to file instead of stdout\n\
-          -i, --input <file>      Input JSON hall file\n\
-          --policy <file>         Custom policy TOML configuration\n\
-          -q, --quiet             Quiet mode; exit code only\n\
-          -v, --verbose           Verbose diagnostic logging to stderr\n\
-        \n\
-        EXAMPLES:\n\
-          boneyard enrich repos.json\n\
-          boneyard report -i repos.json --format markdown -o REPORT.md\n\
-          boneyard policy check -i repos.json --policy policy.toml\n",
-        VERSION
-    );
-}
-
-fn parse_args(args: &[String]) -> Result<Option<CliConfig>, String> {
-    let mut config = CliConfig::default();
-    let mut i = 1;
-
-    while i < args.len() {
-        match args[i].as_str() {
-            "-h" | "--help" => {
-                print_help();
-                return Ok(None);
-            }
-            "-V" | "--version" => {
-                println!("boneyard {}", VERSION);
-                return Ok(None);
-            }
-            "-q" | "--quiet" => config.quiet = true,
-            "-v" | "--verbose" => config.verbose = true,
-            "--format" => {
-                i += 1;
-                if i >= args.len() {
-                    return Err("Missing argument for --format".to_string());
-                }
-                config.format = match args[i].to_lowercase().as_str() {
-                    "json" => OutputFormat::Json,
-                    "markdown" | "md" => OutputFormat::Markdown,
-                    "text" => OutputFormat::Text,
-                    other => return Err(format!("Unknown format: {}", other)),
-                };
-            }
-            "-o" | "--output" => {
-                i += 1;
-                if i >= args.len() {
-                    return Err("Missing argument for -o/--output".to_string());
-                }
-                config.output_file = Some(PathBuf::from(&args[i]));
-            }
-            "-i" | "--input" => {
-                i += 1;
-                if i >= args.len() {
-                    return Err("Missing argument for -i/--input".to_string());
-                }
-                config.input_file = Some(PathBuf::from(&args[i]));
-            }
-            "--policy" => {
-                i += 1;
-                if i >= args.len() {
-                    return Err("Missing argument for --policy".to_string());
-                }
-                config.policy_file = Some(PathBuf::from(&args[i]));
-            }
-            "policy" => {
-                if i + 1 < args.len() && args[i + 1] == "check" {
-                    i += 1;
-                    config.subcommand = "policy_check".to_string();
-                }
-            }
-            "enrich" | "report" => {
-                config.subcommand = args[i].clone();
-            }
-            arg if !arg.starts_with('-') => {
-                config.input_file = Some(PathBuf::from(arg));
-            }
-            other => return Err(format!("Unknown option: {}", other)),
-        }
-        i += 1;
-    }
-    Ok(Some(config))
-}
 
 fn read_hall(path: Option<&PathBuf>) -> Result<boneyard::Hall, String> {
     if let Some(p) = path {
@@ -161,18 +36,15 @@ fn write_output(content: &str, target: Option<&PathBuf>) -> Result<(), std::io::
     }
 }
 
-fn run() -> Result<i32, String> {
-    let args: Vec<String> = env::args().collect();
-    let config = match parse_args(&args)? {
-        Some(c) => c,
-        None => return Ok(0),
-    };
-
+fn get_enriched(config: &CliConfig) -> Result<(boneyard::enrich::EnrichedHall, Policy), CliError> {
     let hall = read_hall(config.input_file.as_ref())?;
     if config.verbose {
-        eprintln!("boneyard: ingested {} repositories for org '{}'", hall.repos.len(), hall.org_name);
+        eprintln!(
+            "boneyard: ingested {} repositories for org '{}'",
+            hall.repos.len(),
+            hall.org_name
+        );
     }
-
     let policy = if let Some(ref p_path) = config.policy_file {
         let content = fs::read_to_string(p_path)
             .map_err(|e| format!("Failed to read policy {}: {}", p_path.display(), e))?;
@@ -180,11 +52,20 @@ fn run() -> Result<i32, String> {
     } else {
         Policy::default()
     };
-
     let enriched = enrich(&hall, &policy).map_err(|e| format!("Enrichment failed: {}", e))?;
+    Ok((enriched, policy))
+}
 
-    match config.subcommand.as_str() {
-        "policy_check" => {
+fn run_app(config: &CliConfig) -> Result<i32, CliError> {
+    let (enriched, policy) = get_enriched(config)?;
+
+    match config.subcommand {
+        Subcommand::Budget => {
+            let out = budget::emit_budget(&enriched, config.format);
+            write_output(&out, config.output_file.as_ref())?;
+            Ok(0)
+        }
+        Subcommand::PolicyCheck => {
             let verdict = boneyard::policy::evaluate(&enriched, &policy);
             if !config.quiet {
                 if verdict.passed {
@@ -204,19 +85,41 @@ fn run() -> Result<i32, String> {
                 OutputFormat::Markdown => report::emit_markdown(&enriched),
                 OutputFormat::Text => report::emit_text(&enriched),
             };
-            write_output(&formatted, config.output_file.as_ref())
-                .map_err(|e| format!("Write failed: {}", e))?;
+            write_output(&formatted, config.output_file.as_ref())?;
             Ok(if enriched.critical_count > 0 { 1 } else { 0 })
         }
+    }
+}
+
+fn run() -> Result<i32, CliError> {
+    let args: Vec<String> = env::args().collect();
+    let config = parse_args(&args)?;
+
+    match config.subcommand {
+        Subcommand::Help => {
+            print_help();
+            Ok(0)
+        }
+        Subcommand::Version => {
+            println!("boneyard {}", VERSION);
+            Ok(0)
+        }
+        Subcommand::Doctor => Ok(doctor::run_doctor("boneyard", VERSION, config.format)),
+        Subcommand::Update => update::run_update("boneyard", VERSION).map_err(CliError::Runtime),
+        _ => run_app(&config),
     }
 }
 
 fn main() {
     match run() {
         Ok(code) => process::exit(code),
-        Err(err) => {
+        Err(CliError::Parse(err)) => {
             eprintln!("error: {}", err);
             process::exit(2);
+        }
+        Err(CliError::Runtime(err)) => {
+            eprintln!("error: {}", err);
+            process::exit(1);
         }
     }
 }
