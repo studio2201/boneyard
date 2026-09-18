@@ -1,0 +1,33 @@
+name: 'Boneyard Tech-Debt Radar'
+description: 'Ranks repositories by tech-debt dormancy and emits remediation budgets'
+author: 'studio2201'
+branding:
+  icon: 'activity'
+  color: 'orange'
+
+inputs:
+  input:
+    description: 'Hall of repos JSON metadata file to enrich'
+    required: false
+    default: 'hall.json'
+  output:
+    description: 'Scored JSON destination file'
+    required: false
+    default: 'scored.json'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Build boneyard
+      shell: bash
+      run: |
+        cargo build --release --manifest-path "${{ github.action_path }}/Cargo.toml"
+        echo "${{ github.action_path }}/target/release" >> $GITHUB_PATH
+
+    - name: Run Boneyard Enrich
+      shell: bash
+      run: |
+        boneyard enrich --input "${{ inputs.input }}" --output "${{ inputs.output }}"
