@@ -6,6 +6,16 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.5] — 2026-09-18
+
+### Added
+- Expanded documentation in README with authoritative problem descriptions and citations:
+  - Stripe Developer Coefficient empirical research on technical debt costs.
+  - ACM Empirical Software Engineering research on repository decay.
+  - Gartner technical debt management framework.
+- Added comprehensive "How It Works Under the Hood" architectural breakdown.
+- Upgraded release metadata and diagnostic baseline.
+
 ## [0.2.4] — 2026-09-18
 
 ### Added
