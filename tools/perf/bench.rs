@@ -1,10 +1,10 @@
-//! tools/perf/bench.rs — §18 bench harness for boneyard.
-//!
-//! Lives as a `#[test]` in tests/integration.rs via `include!` so it is
-//! exercised by `cargo test --release perf_boneyard_enrich_within_budget`.
-//! Honors §18: std::time only, median-of-5, line-oriented output.
-//!
-//! Budget: boneyard enrich on 1k-repo hall ≤ 1.5 s median ±25%.
+// tools/perf/bench.rs — §18 bench harness for boneyard.
+//
+// Lives as a `#[test]` in tests/integration.rs via `include!` so it is
+// exercised by `cargo test --release perf_boneyard_enrich_within_budget`.
+// Honors §18: std::time only, median-of-5, line-oriented output.
+//
+// Budget: boneyard enrich on 1k-repo hall ≤ 1.5 s median ±25%.
 
 use std::time::Instant;
 
@@ -42,5 +42,24 @@ fn perf_boneyard_enrich_within_budget() {
 }
 
 // Fixture builders — synthetic, committed (per §18-C5).
-fn synth_hall_with_n_repos(_n: usize) -> boneyard::Hall { unimplemented!() }
-fn policy() -> boneyard::Policy { unimplemented!() }
+fn synth_hall_with_n_repos(n: usize) -> boneyard::Hall {
+    let mut repos = Vec::with_capacity(n);
+    for i in 0..n {
+        repos.push(boneyard::RepoRecord {
+            name: format!("org-repo-{}", i),
+            is_public: i % 3 == 0,
+            days_dormant: (i % 800) as u32,
+            dependency_count: i % 60,
+            recent_bot_commit_pct: if i % 5 == 0 { 0.8 } else { 0.1 },
+            active_contributors_180d: if i % 10 == 0 { 0 } else { 2 },
+        });
+    }
+    boneyard::Hall {
+        org_name: "synth-org".to_string(),
+        repos,
+    }
+}
+
+fn policy() -> boneyard::Policy {
+    boneyard::Policy::default()
+}

@@ -6,8 +6,17 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-09-18
+
 ### Added
-- (placeholder — next iteration's changes land here)
+- Working pure `std::` Rust implementation of Boneyard tech-debt radar.
+- Pure `std::` JSON ingestion for organization-wide repository halls.
+- Five-axis scoring engine (dormancy, exposure, dependency depth, agentic drift, bus factor) producing composite Boneyard Index (0 - 100).
+- Automatic remediation budget estimations calculated in repo-weeks.
+- TOML policy gating with CI pass/fail assertion.
+- Executive Markdown report, JSON, and terminal summary emitters.
+- Standardized CLI flags: `-h/--help`, `-V/--version`, `--format`, `-o/--output`, `-q/--quiet`, `-v/--verbose`.
+- Performance test verifying 1,000 repositories scored in < 0.2ms (budget 1,500ms).
 
 ## [0.1.2] — 2026-09-17
 
