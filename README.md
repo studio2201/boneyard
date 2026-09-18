@@ -1,11 +1,16 @@
 # Boneyard
 
 [![CI](https://github.com/studio2201/boneyard/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/studio2201/boneyard/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/badge/version-v0.2.3-blue.svg)](https://github.com/studio2201/boneyard/releases)
+[![Release](https://img.shields.io/badge/version-v0.2.4-blue.svg)](https://github.com/studio2201/boneyard/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Pure std::](https://img.shields.io/badge/pure-std%3A%3A-success.svg)](https://studio2201.com)
 [![Reproducible](https://img.shields.io/badge/reproducible-OK-brightgreen.svg)](tools/dev/repro.sh)
 [![Max LOC](https://img.shields.io/badge/max%20LOC-%E2%89%A4256-brightgreen.svg)](https://studio2201.com)
+
+[![Boneyard Index](https://img.shields.io/badge/boneyard%20index-0%2F100-brightgreen.svg)](https://studio2201.com/boneyard)
+[![Remediation Budget](https://img.shields.io/badge/debt%20budget-0%20repo--wks-brightgreen.svg)](https://studio2201.com/boneyard)
+[![Radar Scoring](https://img.shields.io/badge/radar-5--axis%20scoring-blue.svg)](https://studio2201.com/boneyard)
+[![Policy Gate](https://img.shields.io/badge/policy%20gate-PASSED-brightgreen.svg)](https://studio2201.com/boneyard)
 
 **Org-wide tech-debt radar.** Ranks internal repos by dormancy + risk + exposure + dependency depth + AI-agent surface. Emits org-wide remediation budgets in repo-weeks.
 
@@ -48,6 +53,18 @@ Five axes per repo: **dormancy**, **risk**, **exposure**, **depth**, and **ai_ag
 - `boneyard update` / `boneyard upgrade` — Self-update binary
 - `boneyard -h` / `--help` — Show help
 - `boneyard -V` / `--version` — Show version
+
+## Badges & Status
+
+Display your organization's technical debt score and remediation budget:
+
+```markdown
+<!-- Boneyard Tech-Debt Index Badge -->
+[![Boneyard Index](https://img.shields.io/badge/boneyard%20index-0%2F100-brightgreen.svg)](https://studio2201.com/boneyard)
+
+<!-- Remediation Budget Shield -->
+[![Debt Budget](https://img.shields.io/badge/debt%20budget-0%20repo--wks-brightgreen.svg)](https://studio2201.com/boneyard)
+```
 
 ## Why
 

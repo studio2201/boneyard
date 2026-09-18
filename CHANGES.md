@@ -6,6 +6,13 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.4] — 2026-09-18
+
+### Added
+- Tool-specific badges on README: Boneyard Index, Debt Budget in repo-weeks, 5-axis Radar Scoring, and Policy Gate compliance.
+- README guide for embedding Boneyard index and budget badges in organizational repositories.
+- Upgraded release metadata and diagnostic baseline.
+
 ## [0.2.0] — 2026-09-18
 
 ### Added
