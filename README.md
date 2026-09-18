@@ -2,7 +2,7 @@
 
 **Org-wide tech-debt radar.** Ranks internal repos by dormancy + risk + exposure + dependency depth + AI-agent surface. Emits org-wide remediation budgets.
 
-**Status:** pre-release scaffold (2026-09-17). v0.1.0 build (MIT-licensed) was previously scaffolded at `~/Projects/boneyard/` before reuse-rebuild; that v0.1.0 source is in trash. This Apache-2.0 home is a fresh start.
+**Status:** v0.2.0 release (2026-09-18).
 
 ## What it does
 
