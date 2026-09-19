@@ -5,27 +5,49 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 <details>
-<summary><a href="https://studio2201.com/agents#badges"><img src="https://img.shields.io/badge/studio2201-5%2F5%20Verified-2f6f5e?logo=shield" alt="studio2201 Suite"></a> <b>Detailed Governance Scorecard</b></summary>
+<summary>
+  <a href="https://studio2201.com/agents#badges">
+    <img src="https://img.shields.io/badge/studio2201-5%2F5%20Verified-2f6f5e?logo=shield" alt="studio2201 Suite">
+  </a> <b>Detailed Governance Scorecard</b>
+</summary>
 
 | Tool | Focus | Verdict | Status Badge |
 | :--- | :--- | :---: | :---: |
-| [**Snip**](https://studio2201.com/snip) | Vibe-Code & Secrets Gate | `SHIP` | [![Vibe-Safe](https://img.shields.io/badge/vibe--safe-SHIP-brightgreen.svg)](https://studio2201.com/snip) |
-| [**Vigil**](https://studio2201.com/vigil) | Supply-Chain Dormancy | `HEALTHY` | [![Dormancy](https://img.shields.io/badge/dormancy-healthy-2f6f5e.svg)](https://studio2201.com/vigil) |
-| [**Aegis**](https://studio2201.com/aegis) | PQC & Post-Quantum Scans | `QUANTUM-SAFE` | [![PQC](https://img.shields.io/badge/PQC-Quantum--Safe-blueviolet.svg)](https://studio2201.com/aegis) |
-| [**Proven**](https://studio2201.com/proven) | ML-DSA-65 Attestation | `VERIFIED` | [![SLSA](https://img.shields.io/badge/SLSA-Level%203%2B-blue.svg)](https://studio2201.com/proven) |
-| [**Boneyard**](https://studio2201.com/boneyard) | Tech-Debt Radar | `0/100 DEBT` | [![Boneyard](https://img.shields.io/badge/boneyard%20index-0%2F100-brightgreen.svg)](https://studio2201.com/boneyard) |
+| [**Snip**][u-snip] | Vibe-Code & Secrets Gate | `SHIP` | [![Vibe-Safe][b-snip]][u-snip] |
+| [**Vigil**][u-vigil] | Supply-Chain Dormancy | `HEALTHY` | [![Dormancy][b-vigil]][u-vigil] |
+| [**Aegis**][u-aegis] | PQC & Post-Quantum Scans | `QUANTUM-SAFE` | [![PQC][b-aegis]][u-aegis] |
+| [**Proven**][u-proven] | ML-DSA-65 Attestation | `VERIFIED` | [![SLSA][b-proven]][u-proven] |
+| [**Boneyard**][u-boneyard] | Tech-Debt Radar | `0/100 DEBT` | [![Boneyard][b-boneyard]][u-boneyard] |
+
+[u-snip]: https://studio2201.com/snip
+[u-vigil]: https://studio2201.com/vigil
+[u-aegis]: https://studio2201.com/aegis
+[u-proven]: https://studio2201.com/proven
+[u-boneyard]: https://studio2201.com/boneyard
+[b-snip]: https://img.shields.io/badge/vibe--safe-SHIP-brightgreen.svg
+[b-vigil]: https://img.shields.io/badge/dormancy-healthy-2f6f5e.svg
+[b-aegis]: https://img.shields.io/badge/PQC-Quantum--Safe-blueviolet.svg
+[b-proven]: https://img.shields.io/badge/SLSA-Level%203%2B-blue.svg
+[b-boneyard]: https://img.shields.io/badge/boneyard%20index-0%2F100-brightgreen.svg
 
 </details>
 
-**Org-wide tech-debt radar.** Ranks internal repos by dormancy + risk + exposure + dependency depth + AI-agent surface. Emits org-wide remediation budgets in repo-weeks.
+**Organization-wide technical-debt radar.** Analyzes Git repository catalogs across 5 dimensions,
+computes composite risk scores, and outputs remediation budgets in repo-weeks.
 
 ## Why This Action Is Needed
 
-### The Compounding Cost of Technical Debt
-Engineering organizations maintain hundreds or thousands of Git repositories. Over time, repositories silently rot: dependencies fall years behind, original maintainers leave (bus factor collapse), and automated bots churn unreviewed commits.
-- **[Stripe Developer Coefficient Report](https://stripe.com/reports/developer-coefficient-2018)**: Landmark empirical research establishing that bad code and technical debt cost the global economy over $300 billion annually, with engineers losing 33% of productive engineering hours to legacy maintenance.
-- **[ACM Empirical Software Engineering](https://dl.acm.org/doi/10.1145/3377811.3380385)**: Quantifies the compounding risks of unmonitored repository dormancy and architectural decay across enterprise code catalogs.
-- **Automated CI Gates vs Manual Discipline**: Manual debt audits are perpetually postponed against short-term feature delivery. Boneyard provides an automated CI gate that converts nebulous rot into deterministic remediation budgets in repo-weeks, halting pipelines when debt ceilings are breached.
+### The Silent Accumulation of Technical Debt
+Engineering organizations maintain hundreds or thousands of Git repositories. Over time,
+repositories silently rot: dependencies fall years behind, original maintainers leave (bus factor collapse),
+and automated bots churn unreviewed commits.
+- **[Stripe Developer Coefficient Report](https://stripe.com/reports/developer-coefficient-2018)**:
+  Landmark empirical research establishing that bad code and technical debt cost the global economy
+  over $300 billion annually, with engineers losing 33% of productive hours to legacy maintenance.
+- **[ACM Empirical Software Engineering](https://dl.acm.org/doi/10.1145/3377811.3380385)**:
+  Quantifies the compounding risks of unmonitored repository dormancy and architectural decay across catalogs.
+- **Automated CI Gates vs Manual Discipline**: Manual debt audits are perpetually postponed against short-term
+  feature delivery. Boneyard provides an automated CI gate converting rot into deterministic budgets.
 
 ## Autonomous Agent Integration
 
@@ -36,43 +58,72 @@ Deploy Boneyard into your CI pipeline using your AI coding assistant or copy the
 Copy and paste this prompt to Cursor, Claude Code, Copilot Workspace, or Devin:
 
 ```text
-Add a GitHub Actions workflow to this repository at .github/workflows/boneyard.yml using studio2201/boneyard@master. Run on pull requests and a weekly schedule, evaluate repository catalogs against technical debt policies, calculate remediation budgets, and fail if the Boneyard Index exceeds allowed limits.
+Add a GitHub Actions workflow to this repository at .github/workflows/studio2201.yml using studio2201/studio2201@master.
+Trigger on pull_request and push to master/main, and workflow_dispatch.
+Configure concurrency with cancel-in-progress on pull requests.
+Set permissions to contents: read, checkout with fetch-depth: 0, run studio2201/studio2201@master with tools: 'all' and fail-on: 'block'.
+Retain audit findings using actions/upload-artifact@v4 with if: always().
+Finally, add the Option 1 Single Suite Badge or Option 2 Governance Scorecard to README.md.
 ```
 
 ### GitHub Actions Workflow
 
-Commit this complete, production-ready workflow at `.github/workflows/boneyard.yml`:
+Commit this complete, production-ready workflow at `.github/workflows/studio2201.yml`:
 
 ```yaml
-name: Boneyard Tech-Debt Radar
+name: studio2201 Security Gate
 on:
-  schedule:
-    - cron: '0 0 * * 1'
+  push:
+    branches: [ master, main ]
   pull_request:
     branches: [ master, main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
+
 jobs:
-  boneyard-audit:
+  security-gate:
+    name: studio2201 Security Gate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Audit Repository Debt
-        uses: studio2201/boneyard@master
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          input: 'hall.json'
+          fetch-depth: 0
+
+      - name: Run studio2201 Security Gate
+        uses: studio2201/studio2201@master
+        with:
+          tools: 'all'
+          fail-on: 'block'
+
+      - name: Retain Audit Findings
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: studio2201-audit-findings
+          path: |
+            *_report.md
+          if-no-files-found: ignore
 ```
 
 ## How It Works Under the Hood
 
-1. **Hall Ingestion (`src/hall.rs`)**: Reads organization-wide repository catalogs (`hall.json`) mapping commit history, contributor counts, public/private exposure, and dependency depth.
+1. **Hall Ingestion (`src/hall.rs`)**: Reads organization-wide repository catalogs (`hall.json`) mapping
+   commit history, contributor counts, public/private exposure, and dependency depth.
 2. **Five-Axis Scoring Engine (`src/enrich.rs`)**:
    - **Dormancy (0–30 pts)**: Days since last human commit scaled over 365 days.
    - **Exposure (0–20 pts)**: Public Internet surface area (20 pts) vs internal service (5 pts).
    - **Dependency Depth (0–20 pts)**: Nested dependency tree complexity.
    - **Agentic Drift (0–15 pts)**: Ratio of automated bot commits versus human code review.
    - **Bus Factor (0–15 pts)**: Active human contributors in the last 180 days (0 contributors = 15 pts).
-3. **Remediation Budgeting**: Translates the composite Boneyard Index (0.0 to 100.0) into actionable engineering allocations expressed in **repo-weeks**.
+3. **Remediation Budgeting**: Translates the composite Boneyard Index (0.0 to 100.0) into actionable
+   engineering allocations expressed in **repo-weeks**.
 4. **Automated CI Policy Gating (`src/policy.rs`)**: Evaluates repository debt against TOML compliance thresholds.
 
 ## Quick Start
