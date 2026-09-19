@@ -1,6 +1,6 @@
 [package]
 name = "boneyard"
-version = "0.2.7"
+version = "0.2.8"
 edition = "2021"
 publish = false
 description = "Org-wide tech-debt radar and repo scoring engine"
