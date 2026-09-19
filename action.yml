@@ -53,14 +53,17 @@ runs:
             boneyard scan -i "$INPUT" -o "${{ inputs.output }}" --format json >/dev/null 2>&1
           fi
         else
-          echo "Error: Catalog file not found at \`$INPUT\`." > boneyard_summary.md
-          EC=1
+          echo "No catalog file found at \`$INPUT\`. Skipping boneyard debt radar." > boneyard_summary.md
+          EC=0
         fi
         set -e
 
         STATUS="🟢 WITHIN BUDGET"
         BADGE="https://img.shields.io/badge/Boneyard-HEALTHY-brightgreen"
-        if [ $EC -ne 0 ]; then
+        if [ ! -f "$INPUT" ]; then
+          STATUS="⚪ SKIPPED"
+          BADGE="https://img.shields.io/badge/Boneyard-SKIPPED-lightgrey"
+        elif [ $EC -ne 0 ]; then
           STATUS="🔴 DEBT BREACH"
           BADGE="https://img.shields.io/badge/Boneyard-BREACH-red"
         fi

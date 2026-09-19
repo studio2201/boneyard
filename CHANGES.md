@@ -4,6 +4,12 @@ All notable changes to this project are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/) 1.1.0.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.2.10] — 2026-09-19
+
+### Added
+- Dedicated single-tool GitHub Actions workflow `.github/workflows/boneyard.yml`.
+- Dynamic Shields.io workflow status badge support and graceful missing catalog handling.
+
 ## [0.2.9] — 2026-09-19
 
 ### Added
