@@ -62,10 +62,7 @@ Add a GitHub Actions workflow to this repository at .github/workflows/boneyard.y
 - Permissions: contents: read, checkout with fetch-depth: 0.
 - Action: run studio2201/studio2201@v1 with tools: 'boneyard' and fail-on: 'block'.
 - Artifacts: upload boneyard_report.md using actions/upload-artifact@v4 with if: always().
-- README Badge: add dynamic Shields.io workflow status badge to top of README.md (replace <owner>/<repo>):
-  [![boneyard][b-boneyard]][ci-boneyard]
-  [b-boneyard]: https://img.shields.io/github/actions/workflow/status/<owner>/<repo>/boneyard.yml?label=boneyard&logo=shield
-  [ci-boneyard]: https://github.com/<owner>/<repo>/actions/workflows/boneyard.yml
+- README Scorecard: embed the studio2201 Centered Scorecard table at top of README.md (specs: studio2201.com/agents).
 ```
 
 ### GitHub Actions Workflow
