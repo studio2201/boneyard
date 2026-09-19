@@ -14,20 +14,66 @@ inputs:
     description: 'Scored JSON destination file'
     required: false
     default: 'scored.json'
+  format:
+    description: 'Output format (markdown, text, json)'
+    required: false
+    default: 'markdown'
 
 runs:
   using: 'composite'
   steps:
-    - name: Set up Rust
-      uses: dtolnay/rust-toolchain@stable
-
-    - name: Build boneyard
+    - name: Fast Bootstrap boneyard
       shell: bash
       run: |
-        cargo build --release --manifest-path "${{ github.action_path }}/Cargo.toml"
-        echo "${{ github.action_path }}/target/release" >> $GITHUB_PATH
+        DEST="${XDG_BIN_HOME:-$HOME/.local/bin}"
+        mkdir -p "$DEST"
+        if ! command -v boneyard >/dev/null 2>&1; then
+          if [ -f "${{ github.action_path }}/../install.sh" ]; then
+            sh "${{ github.action_path }}/../install.sh" --dest "$DEST" boneyard
+          elif [ -f "${{ github.action_path }}/install.sh" ]; then
+            sh "${{ github.action_path }}/install.sh" --dest "$DEST" boneyard
+          else
+            curl -fsSL --retry 3 https://studio2201.com/install.sh | sh -s -- --dest "$DEST" boneyard
+          fi
+        fi
+        echo "$DEST" >> "$GITHUB_PATH"
 
-    - name: Run Boneyard Enrich
+    - name: Run Boneyard Scan & Report
       shell: bash
       run: |
-        boneyard enrich --input "${{ inputs.input }}" --output "${{ inputs.output }}"
+        export PATH="${XDG_BIN_HOME:-$HOME/.local/bin}:$PATH"
+        INPUT="${{ inputs.input }}"
+        [ ! -f "$INPUT" ] && [ -f "catalog.json" ] && INPUT="catalog.json"
+
+        set +e
+        if [ -f "$INPUT" ]; then
+          boneyard scan -i "$INPUT" --format "${{ inputs.format }}" > boneyard_summary.md 2>&1
+          EC=$?
+          if [ -n "${{ inputs.output }}" ]; then
+            boneyard scan -i "$INPUT" -o "${{ inputs.output }}" --format json >/dev/null 2>&1
+          fi
+        else
+          echo "Error: Catalog file not found at \`$INPUT\`." > boneyard_summary.md
+          EC=1
+        fi
+        set -e
+
+        STATUS="🟢 WITHIN BUDGET"
+        BADGE="https://img.shields.io/badge/Boneyard-HEALTHY-brightgreen"
+        if [ $EC -ne 0 ]; then
+          STATUS="🔴 DEBT BREACH"
+          BADGE="https://img.shields.io/badge/Boneyard-BREACH-red"
+        fi
+
+        if [ -n "$GITHUB_STEP_SUMMARY" ]; then
+          {
+            echo "## ⚡ Boneyard Tech-Debt Remediation Radar"
+            echo ""
+            echo "| Status | Catalog File | Badge |"
+            echo "| :---: | :---: | :---: |"
+            echo "| **${STATUS}** | \`${INPUT}\` | ![Boneyard](${BADGE}) |"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+          cat boneyard_summary.md >> "$GITHUB_STEP_SUMMARY"
+        fi
+        exit $EC

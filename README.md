@@ -1,7 +1,7 @@
 # Boneyard
 
 [![CI](https://github.com/studio2201/boneyard/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/studio2201/boneyard/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/badge/version-v0.2.5-blue.svg)](https://github.com/studio2201/boneyard/releases)
+[![Release](https://img.shields.io/badge/version-v0.2.6-blue.svg)](https://github.com/studio2201/boneyard/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Pure std::](https://img.shields.io/badge/pure-std%3A%3A-success.svg)](https://studio2201.com)
 [![Reproducible](https://img.shields.io/badge/reproducible-OK-brightgreen.svg)](tools/dev/repro.sh)
@@ -14,13 +14,49 @@
 
 **Org-wide tech-debt radar.** Ranks internal repos by dormancy + risk + exposure + dependency depth + AI-agent surface. Emits org-wide remediation budgets in repo-weeks.
 
-## Why This Matters & Authoritative Research
+## Why This Action Is Needed
 
-### 1. The $300 Billion Technical Debt Crisis
-Large engineering organizations maintain hundreds or thousands of Git repositories. Over time, repositories silently rot: dependencies fall years behind, original maintainers leave (bus factor collapse), and automated bots churn untested commits.
-- **[Stripe Developer Coefficient Report](https://stripe.com/reports/developer-coefficient-2018)**: Landmark empirical research establishing that bad code and technical debt cost the global economy over $300 billion annually, with engineers losing 33% of their productive time maintaining legacy debt.
+### The Compounding Cost of Technical Debt
+Engineering organizations maintain hundreds or thousands of Git repositories. Over time, repositories silently rot: dependencies fall years behind, original maintainers leave (bus factor collapse), and automated bots churn unreviewed commits.
+- **[Stripe Developer Coefficient Report](https://stripe.com/reports/developer-coefficient-2018)**: Landmark empirical research establishing that bad code and technical debt cost the global economy over $300 billion annually, with engineers losing 33% of productive engineering hours to legacy maintenance.
 - **[ACM Empirical Software Engineering](https://dl.acm.org/doi/10.1145/3377811.3380385)**: Quantifies the compounding risks of unmonitored repository dormancy and architectural decay across enterprise code catalogs.
-- **[Gartner Technical Debt Management Research](https://www.gartner.com/smarterwithgartner/how-to-manage-technical-debt)**: Urges engineering leadership to establish clear, measurable remediation budgets to prevent systemic operational paralysis.
+- **Automated CI Gates vs Manual Discipline**: Manual debt audits are perpetually postponed against short-term feature delivery. Boneyard provides an automated CI gate that converts nebulous rot into deterministic remediation budgets in repo-weeks, halting pipelines when debt ceilings are breached.
+
+## Autonomous Agent Integration
+
+Deploy Boneyard into your CI pipeline using your AI coding assistant or copy the workflow below.
+
+### Prompt for your AI Agent
+
+Copy and paste this prompt to Cursor, Claude Code, Copilot Workspace, or Devin:
+
+```text
+Add a GitHub Actions workflow to this repository at .github/workflows/boneyard.yml using studio2201/boneyard@master. Run on pull requests and a weekly schedule, evaluate repository catalogs against technical debt policies, calculate remediation budgets, and fail if the Boneyard Index exceeds allowed limits.
+```
+
+### GitHub Actions Workflow
+
+Commit this complete, production-ready workflow at `.github/workflows/boneyard.yml`:
+
+```yaml
+name: Boneyard Tech-Debt Radar
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+  pull_request:
+    branches: [ master, main ]
+permissions:
+  contents: read
+jobs:
+  boneyard-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit Repository Debt
+        uses: studio2201/boneyard@master
+        with:
+          input: 'hall.json'
+```
 
 ## How It Works Under the Hood
 
@@ -48,18 +84,6 @@ boneyard budget --input hall.json
 
 # Run system diagnostics
 boneyard doctor
-```
-
-## GitHub Action Usage
-
-Enrich repository metadata and generate debt reports in CI:
-
-```yaml
-- name: Boneyard Tech-Debt Radar
-  uses: studio2201/boneyard@master
-  with:
-    input: 'hall.json'
-    output: 'scored.json'
 ```
 
 ## CLI Commands
