@@ -82,10 +82,10 @@ jobs:
   boneyard:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with: { fetch-depth: 0 }
       - uses: studio2201/boneyard@v1
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with: { name: boneyard-report, path: boneyard_summary.md, if-no-files-found: ignore }
 ```
