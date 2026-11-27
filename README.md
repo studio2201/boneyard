@@ -55,14 +55,13 @@ Deploy Boneyard into your CI pipeline using your AI coding assistant or copy the
 Copy and paste this prompt to Cursor, Claude Code, Copilot Workspace, or Devin:
 
 ```text
-Add a GitHub Actions workflow to this repository at .github/workflows/boneyard.yml using studio2201/studio2201@v1:
+Add a GitHub Actions workflow to this repository at .github/workflows/boneyard.yml using studio2201/boneyard@v1:
 - Name: boneyard
 - Triggers: pull_request, push to default branch (master/main), and workflow_dispatch.
 - Concurrency: group ${{ github.workflow }}-${{ github.ref }} with cancel-in-progress on pull_request.
 - Permissions: contents: read, checkout with fetch-depth: 0.
-- Action: run studio2201/studio2201@v1 with tools: 'boneyard' and fail-on: 'block'.
-- Artifacts: upload boneyard_report.md using actions/upload-artifact@v4 with if: always().
-- README Scorecard: embed the studio2201 Centered Scorecard table at top of README.md (specs: studio2201.com/agents).
+- Action: run studio2201/boneyard@v1.
+- Artifacts: upload boneyard_summary.md using actions/upload-artifact@v4 with if: always().
 ```
 
 ### GitHub Actions Workflow
@@ -85,11 +84,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - uses: studio2201/studio2201@v1
-        with: { tools: 'boneyard', fail-on: 'block' }
+      - uses: studio2201/boneyard@v1
       - uses: actions/upload-artifact@v4
         if: always()
-        with: { name: boneyard-report, path: boneyard_report.md, if-no-files-found: ignore }
+        with: { name: boneyard-report, path: boneyard_summary.md, if-no-files-found: ignore }
 ```
 
 ## How It Works Under the Hood
