@@ -22,35 +22,53 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Fast Bootstrap boneyard
+    - name: Bootstrap boneyard (pinned v0.2.9 + SHA-256)
       shell: bash
       run: |
         DEST="${XDG_BIN_HOME:-$HOME/.local/bin}"
         mkdir -p "$DEST"
         if ! command -v boneyard >/dev/null 2>&1; then
-          if [ -f "${{ github.action_path }}/../install.sh" ]; then
-            sh "${{ github.action_path }}/../install.sh" --dest "$DEST" boneyard
-          elif [ -f "${{ github.action_path }}/install.sh" ]; then
-            sh "${{ github.action_path }}/install.sh" --dest "$DEST" boneyard
+          TMP=$(mktemp -d)
+          trap 'rm -rf "$TMP"' EXIT
+          case "$(uname -s)-$(uname -m)" in
+            Linux-x86_64) TARGET="x86_64-unknown-linux-musl" ;;
+            Linux-aarch64|Linux-arm64) TARGET="aarch64-unknown-linux-musl" ;;
+            Darwin-x86_64) TARGET="x86_64-apple-darwin" ;;
+            Darwin-arm64|Darwin-aarch64) TARGET="aarch64-apple-darwin" ;;
+            *) echo "::error::Unsupported platform $(uname -s)-$(uname -m)"; exit 1 ;;
+          esac
+          ASSET="boneyard-${TARGET}.tar.gz"
+          URL="https://github.com/studio2201/boneyard/releases/download/v0.2.9/${ASSET}"
+          curl -fsSL --retry 3 "$URL" -o "$TMP/$ASSET"
+          curl -fsSL --retry 3 "${URL}.sha256" -o "$TMP/${ASSET}.sha256"
+          EXPECTED=$(awk '{print $1}' "$TMP/${ASSET}.sha256")
+          [[ "$EXPECTED" =~ ^[0-9a-fA-F]{64}$ ]] || { echo "::error::Invalid SHA-256 for $ASSET"; exit 1; }
+          if command -v sha256sum >/dev/null 2>&1; then
+            (cd "$TMP" && printf '%s  %s\n' "$EXPECTED" "$ASSET" | sha256sum --strict --check -)
           else
-            curl -fsSL --retry 3 https://studio2201.com/install.sh | sh -s -- --dest "$DEST" boneyard
+            (cd "$TMP" && printf '%s  %s\n' "$EXPECTED" "$ASSET" | shasum -a 256 --check -)
           fi
+          tar -xzf "$TMP/$ASSET" -C "$DEST" boneyard && chmod 755 "$DEST/boneyard"
         fi
         echo "$DEST" >> "$GITHUB_PATH"
 
     - name: Run Boneyard Scan & Report
       shell: bash
+      env:
+        INPUT_INPUT: ${{ inputs.input }}
+        INPUT_OUTPUT: ${{ inputs.output }}
+        INPUT_FORMAT: ${{ inputs.format }}
       run: |
         export PATH="${XDG_BIN_HOME:-$HOME/.local/bin}:$PATH"
-        INPUT="${{ inputs.input }}"
+        INPUT="$INPUT_INPUT"
         [ ! -f "$INPUT" ] && [ -f "catalog.json" ] && INPUT="catalog.json"
 
         set +e
         if [ -f "$INPUT" ]; then
-          boneyard scan -i "$INPUT" --format "${{ inputs.format }}" > boneyard_summary.md 2>&1
+          boneyard scan -i "$INPUT" --format "$INPUT_FORMAT" > boneyard_summary.md 2>&1
           EC=$?
-          if [ -n "${{ inputs.output }}" ]; then
-            boneyard scan -i "$INPUT" -o "${{ inputs.output }}" --format json >/dev/null 2>&1
+          if [ -n "$INPUT_OUTPUT" ]; then
+            boneyard scan -i "$INPUT" -o "$INPUT_OUTPUT" --format json >/dev/null 2>&1
           fi
         else
           echo "No catalog file found at \`$INPUT\`. Skipping boneyard debt radar." > boneyard_summary.md
@@ -68,7 +86,7 @@ runs:
           BADGE="https://img.shields.io/badge/Boneyard-BREACH-red"
         fi
 
-        if [ -n "$GITHUB_STEP_SUMMARY" ]; then
+        if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
           {
             echo "## ⚡ Boneyard Tech-Debt Remediation Radar"
             echo ""

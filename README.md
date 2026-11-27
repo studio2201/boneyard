@@ -109,8 +109,8 @@ jobs:
 ## Quick Start
 
 ```bash
-# Install via studio2201 installer
-curl -fsSL https://studio2201.com/install.sh | sh -s boneyard
+# Install from source (or download release tarballs from GitHub Releases)
+cargo install --git https://github.com/studio2201/boneyard
 
 # Enrich hall metadata and compute Boneyard Index
 boneyard enrich --input hall.json --output scored.json
